@@ -6,7 +6,7 @@
 
 
 ; A struct for a cell, containing the row, col and box indices as well as numbers (row by column)
-(struct subgrid (row col box nums) )
+(struct subgrid (row col box nums) #:transparent)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Gets the row position from position in flattened grip 
@@ -35,8 +35,8 @@
 )  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Transforms grid from a numbers only grid to a grid that contains a the numbers as a set if not 0 or as the intset if 0
-(define (transform grid)
+; Transforms puzzle from a numbers only puzzle to a grid that contains the numbers as a single value set if not 0 or as the intset if 0
+(define (transform puzzle)
 	(map (lambda (alist)
 		(map (lambda number)
 			(if (equal? number 0) 
@@ -45,15 +45,15 @@
 			)
 			alist 
 		) )	
-		grid 
+		puzzle 
 	) 
 )
 
-; Does same as above but flattens grid
-(define (transform-flat grid) 
+; Does same as above but flattens puzzle
+(define (transform-flat puzzle) 
 	(map (lambda (number) 
 		(if (equal? number 0) intset (set number) )
-		(flatten grid) 
+		(flatten puzzle) 
 	) )
 )
 
@@ -81,9 +81,9 @@
 	)
 )
 
-; Run the populate-subgrid function with custom map over flattened grid structure
-(define (transform-subgrid grid)
-	(custom-map populate-subgrid (flatten grid) )
+; Run the populate-subgrid function with custom map over flattened puzzle structure
+(define (transform-subgrid puzzle)
+	(custom-map populate-subgrid (flatten puzzle) )
 )
 
 ; Get just the numbers (either singleton or set) from a subgrid cell
@@ -98,12 +98,12 @@
 
 ; Extract all numbers (either singleton or set) from entire grid
 (define (extract-row-nums rownum grid) 
-	(let iterator ( [carsubgrid (car grid) ]
-					[partialgrid (cdr grid) ]
-					[accum '() ] )
+	(let iterator ( 	[carsubgrid (car grid) ]
+				[partialgrid (cdr grid) ]
+				[accum '() ] )
 		(let ( ( acclist (if (equal? rownum (subgrid-row carsubgrid) )
-							(cons (extract-subgrid-nums carsubgrid) accum)	
-							accum) ) )
+								(cons (extract-subgrid-nums carsubgrid) accum)	
+								accum) ) )
 			(if (null? partialgrid)	
 				(reverse acclist)
 				(iterator 	(car partialgrid)
@@ -122,7 +122,7 @@
 		(if (> 0 nrow)
 			puzzle
 			(iterator 	(cons (extract-row-nums nrow grid) puzzle)
-						(- nrow 1) )
+					(- nrow 1) )
 		)
 	)
 )
